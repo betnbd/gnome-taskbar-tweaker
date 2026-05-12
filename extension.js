@@ -409,9 +409,12 @@ export default class GnomeTaskbarTweakerExtension extends Extension {
                     .map(id => itemsById.get(id))
                     .filter(Boolean);
 
+                if (!box || this._sectionMatchesTarget(box, targetItems))
+                    continue;
+
                 targetItems.forEach((item, index) => {
                     const container = item.container;
-                    if (!container || !box)
+                    if (!container)
                         return;
 
                     try {
@@ -425,6 +428,18 @@ export default class GnomeTaskbarTweakerExtension extends Extension {
         } finally {
             this._isApplyingLayout = false;
         }
+    }
+
+    _sectionMatchesTarget(box, targetItems) {
+        const targetActors = targetItems
+            .map(item => item.container)
+            .filter(Boolean);
+
+        const targetActorSet = new Set(targetActors);
+        const currentActors = this._getBoxChildren(box)
+            .filter(actor => targetActorSet.has(actor));
+
+        return arraysEqual(currentActors, targetActors);
     }
 
     _removeActorFromParent(actor) {
